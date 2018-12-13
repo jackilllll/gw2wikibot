@@ -53,16 +53,16 @@ class Gw2WikiBot:
                 "name_en": data_en["name"]
             })
 
-        self.upload_data(wiki_name, data)
+        yield self.upload_data(wiki_name, data)
 
     def upload_data(self, wiki_name, data):
         wiki_content = json.dumps(data, ensure_ascii=False)
         page = self.site.pages[wiki_name]
         if not page.exists:
             page.save(wiki_content, 'upload data by bot')
-            print('{}-上传成功'.format(wiki_name))
+            yield ('{}-上传成功'.format(wiki_name))
         else:
-            print('{}-已经存在'.format(wiki_name))
+            yield ('{}-已经存在'.format(wiki_name))
 
     def update(self, data_type, init=False):
         """
@@ -74,7 +74,7 @@ class Gw2WikiBot:
         need_update_ids = self.get_sync_ids(data_type, init)
         print("{}有{}个项需要更新".format(data_type, len(need_update_ids)))
         for data_id in need_update_ids:
-            self.get_and_upload_data(data_type, data_id)
+            yield self.get_and_upload_data(data_type, data_id)
 
     def upload_images_by_page(self, page_name, wiki_version=2):
         """
@@ -96,6 +96,26 @@ class Gw2WikiBot:
                     print(e)
                     yield ('{} 上传失败'.format(img.page_title))
 
+    def mv(self, en_name, zh_name):
+        """
+        从英文wiki搬运页面到中文wiki,并自动处理图片上传
+        :param en_name: 英文wiki页面名称
+        :param zh_name: 中文wiki页面名称
+        :return:
+        """
+        en_page_url = 'https://wiki.guildwars2.com/index.php?title={}&action=raw'.format(en_name)
+        r = requests.get(en_page_url)
+        page = self.site.pages[zh_name]
+        if not page.exists:
+            r = page.save(r.text, '{}>{}(机器人搬运)'.format(en_name, zh_name))
+            if r['result'] == 'Success':
+                yield '页面:{}搬运成功，正在上传图片...'
+                for i in self.upload_images_by_page(zh_name):
+                    yield i
+                yield '页面:{}搬运完成,图片上传完毕'.format(zh_name)
+        else:
+            yield '页面已经存在无需搬运'
+
     @staticmethod
     def get_wiki_image_url(wiki_version, image_name):
         """
@@ -116,3 +136,6 @@ class Gw2WikiBot:
 
 
 wikibot = Gw2WikiBot(username=username, password=password)
+
+if __name__ == '__main__':
+    wikibot.mv('Looking For Group', '寻找队伍')
