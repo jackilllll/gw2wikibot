@@ -11,14 +11,13 @@ token = conf.get('DISCORD', 'token')
 bot = commands.Bot(command_prefix='$')
 
 
-@bot.commands()
+@bot.command()
 async def mv(ctx, en, zh):
-    print(en, zh)
     for res in wikibot.mv(en, zh):
         await ctx.send(res)
 
 
-@bot.commands()
+@bot.command()
 async def update(ctx, data_type):
     for res in wikibot.update(data_type):
         await ctx.send(res)
@@ -44,4 +43,5 @@ async def upload_image_v1(ctx, *args):
         time.sleep(2)
 
 
-bot.run(token)
+if __name__ == '__main__':
+    bot.run(token)
