@@ -13,6 +13,7 @@ bot = commands.Bot(command_prefix='$')
 
 @bot.commands()
 async def mv(ctx, en, zh):
+    print(en, zh)
     for res in wikibot.mv(en, zh):
         await ctx.send(res)
 
