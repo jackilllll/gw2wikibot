@@ -103,13 +103,13 @@ class Gw2WikiBot:
         :param zh_name: 中文wiki页面名称
         :return:
         """
-        en_page_url = 'https://wiki.guildwars2.com/index.php?title={}&action=raw'.format(en_name)
-        r = requests.get(en_page_url)
         page = self.site.pages[zh_name]
         if not page.exists:
+            en_page_url = 'https://wiki.guildwars2.com/index.php?title={}&action=raw'.format(en_name)
+            r = requests.get(en_page_url)
             r = page.save(r.text, '{}>{}(机器人搬运)'.format(en_name, zh_name))
             if r['result'] == 'Success':
-                yield '页面:{}搬运成功，正在上传图片...'
+                yield '页面:{}搬运成功，正在上传图片...'.format(zh_name)
                 for i in self.upload_images_by_page(zh_name):
                     yield i
                 yield '页面:{}搬运完成,图片上传完毕'.format(zh_name)
