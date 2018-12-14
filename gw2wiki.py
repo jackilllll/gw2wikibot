@@ -84,17 +84,20 @@ class Gw2WikiBot:
         :return:
         """
         page = self.site.pages[page_name]
-        for image in page.images():
-            img = self.site.images[image.page_title]
-            if not img.exists:
-                origin_url = self.get_wiki_image_url(wiki_version, img.page_title)
-                time.sleep(1)
+        need_upload_images = [img for img in page.images() if not img.exists]
+        all_account = len(need_upload_images)
+        for index, img in enumerate(need_upload_images):
+            origin_url = self.get_wiki_image_url(wiki_version, img.page_title)
+            time.sleep(1)
+            if origin_url:
                 try:
                     self.site.upload(filename=img.page_title, url=origin_url)
-                    yield ('{} 上传成功'.format(img.page_title))
+                    yield ('【{}】上传成功({}/{})'.format(img.page_title, index + 1, all_account))
                 except Exception as e:
                     print(e)
-                    yield ('{} 上传失败'.format(img.page_title))
+                    yield ('【{}】上传失败({}/{})'.format(img.page_title, index + 1, all_account))
+            else:
+                yield ('【{}】上传失败(在wiki中找不到该图片)({}/{})'.format(img.page_title, index + 1, all_account))
 
     def mv(self, en_name, zh_name):
         """
@@ -130,12 +133,18 @@ class Gw2WikiBot:
         request = HTMLSession()
         r = request.get(image_page_url)
         a = r.html.xpath('//*[@id="file"]/a/img')
-        image_base_url = 'https://wiki.guildwars{}.com'.format(v)
-        image_url = urljoin(image_base_url, a[0].attrs['src'])
-        return image_url
+        if a:
+            image_base_url = 'https://wiki.guildwars{}.com'.format(v)
+            image_url = urljoin(image_base_url, a[0].attrs['src'])
+            return image_url
+        else:
+            return None
 
 
 wikibot = Gw2WikiBot(username=username, password=password)
 
-if __name__ == '__main__':
-    wikibot.mv('Looking For Group', '寻找队伍')
+# if __name__ == '__main__':
+# for i in wikibot.update('skill'):
+#     print(i)
+for i in wikibot.upload_images_by_page('神佑之城'):
+    print(i)

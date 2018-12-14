@@ -14,12 +14,14 @@ bot = commands.Bot(command_prefix='$')
 @bot.command()
 async def mv(ctx, en, zh):
     for res in wikibot.mv(en, zh):
+        print(res)
         await ctx.send(res)
 
 
 @bot.command()
 async def update(ctx, data_type):
     for res in wikibot.update(data_type):
+        print(res)
         await ctx.send(res)
 
 
