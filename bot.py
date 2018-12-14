@@ -11,18 +11,25 @@ token = conf.get('DISCORD', 'token')
 bot = commands.Bot(command_prefix='$')
 
 
-@bot.command(name="help")
-async def _help(ctx):
-    h = '''    
-mv：从英文wiki搬运页面 eg: mv "Lion's Arch" 狮子拱门
-fpi：即fix page images ,自动搬运页面中缺失的图片(搬运多个页面用空格隔开)eg: fpi 狮子拱门 神秘熔炉
-fpi1: 从1代wiki中搬运图片,用法同上
-    '''
-    await ctx.send(h)
+# @bot.command(name="help")
+# async def _help(ctx):
+#     h = '''
+# mv：从英文wiki搬运页面 eg: mv "Lion's Arch" 狮子拱门
+# fpi：即fix page images ,自动搬运页面中缺失的图片(搬运多个页面用空格隔开)eg: fpi 狮子拱门 神秘熔炉
+# fpi1: 从1代wiki中搬运图片,用法同上
+#     '''
+#     await ctx.send(h)
 
 
 @bot.command()
 async def mv(ctx, en, zh):
+    """
+    从英文wiki搬运页面 eg: mv "Lion's Arch" 狮子拱门
+    :param ctx:
+    :param en:
+    :param zh:
+    :return:
+    """
     for res in wikibot.mv(en, zh):
         print(res)
         await ctx.send(res)
@@ -37,6 +44,12 @@ async def update(ctx, data_type):
 
 @bot.command(name='fpi')
 async def upload_image(ctx, *args):
+    """
+    即fix page images ,自动搬运页面中缺失的图片(搬运多个页面用空格隔开)eg: fpi 狮子拱门 神秘熔炉
+    :param ctx:
+    :param args:
+    :return:
+    """
     for page in args:
         for i in wikibot.upload_images_by_page(page):
             print(i)
@@ -46,6 +59,12 @@ async def upload_image(ctx, *args):
 
 @bot.command(name='fpi1')
 async def upload_image_v1(ctx, *args):
+    """
+    从1代wiki中搬运图片,用法同fpi
+    :param ctx:
+    :param args:
+    :return:
+    """
     for page in args:
         for i in wikibot.upload_images_by_page(page, wiki_version=1):
             print(i)
