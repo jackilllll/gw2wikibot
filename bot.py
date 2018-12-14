@@ -28,6 +28,7 @@ async def upload_image(ctx, *args):
     for page in args:
         await ctx.send('====开始上传【{}】中缺失的图片===='.format(page))
         for i in wikibot.upload_images_by_page(page):
+            print(i)
             await ctx.send(i)
         await ctx.send('====【{}】中缺失的图片上传完毕===='.format(page))
         time.sleep(2)
@@ -38,6 +39,7 @@ async def upload_image_v1(ctx, *args):
     for page in args:
         await ctx.send('====开始上传【{}】中缺失的图片===='.format(page))
         for i in wikibot.upload_images_by_page(page, wiki_version=1):
+            print(i)
             await ctx.send(i)
         await ctx.send('====【{}】中缺失的图片上传完毕===='.format(page))
         time.sleep(2)
