@@ -86,6 +86,8 @@ class Gw2WikiBot:
         page = self.site.pages[page_name]
         need_upload_images = [img for img in page.images() if not img.exists]
         all_account = len(need_upload_images)
+        fail_count = 0
+        yield ('====开始上传【{}】中缺失的图片({}张)===='.format(page_name, all_account))
         for index, img in enumerate(need_upload_images):
             origin_url = self.get_wiki_image_url(wiki_version, img.page_title)
             time.sleep(1)
@@ -95,9 +97,13 @@ class Gw2WikiBot:
                     yield ('【{}】上传成功({}/{})'.format(img.page_title, index + 1, all_account))
                 except Exception as e:
                     print(e)
+                    fail_count += 1
                     yield ('【{}】上传失败({}/{})'.format(img.page_title, index + 1, all_account))
             else:
+                fail_count += 1
                 yield ('【{}】上传失败(在wiki中找不到该图片)({}/{})'.format(img.page_title, index + 1, all_account))
+
+        yield ('====【{}】中缺失的图片上传完毕(成功：{},失败:{})===='.format(page_name, all_account - fail_count, fail_count))
 
     def mv(self, en_name, zh_name):
         """
@@ -142,9 +148,3 @@ class Gw2WikiBot:
 
 
 wikibot = Gw2WikiBot(username=username, password=password)
-
-# if __name__ == '__main__':
-# for i in wikibot.update('skill'):
-#     print(i)
-for i in wikibot.upload_images_by_page('神佑之城'):
-    print(i)
