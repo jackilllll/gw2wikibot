@@ -125,6 +125,25 @@ class Gw2WikiBot:
         else:
             yield '页面已经存在无需搬运'
 
+    def tmp_mv(self, en_name):
+        """
+        从英文wiki搬运页面到中文wiki,并自动处理图片上传
+        :param en_name: 模板的英文名称，不带Template:
+        :return:
+        """
+        page = self.site.pages[en_name]
+        if not page.exists:
+            en_page_url = 'https://wiki.guildwars2.com/index.php?title=Template:{}&action=raw'.format(en_name)
+            r = requests.get(en_page_url)
+            r = page.save(r.text, '{}创建(机器人搬运)'.format(en_name))
+            if r['result'] == 'Success':
+                yield '模板:{}搬运成功，正在上传图片...'.format(en_name)
+                for i in self.upload_images_by_page(en_name):
+                    yield i
+                yield '模板:{}搬运完成,图片上传完毕'.format(en_name)
+        else:
+            yield '模板已经存在无需搬运'
+
     @staticmethod
     def get_wiki_image_url(wiki_version, image_name):
         """

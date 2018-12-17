@@ -11,14 +11,17 @@ token = conf.get('DISCORD', 'token')
 bot = commands.Bot(command_prefix='$')
 
 
-# @bot.command(name="help")
-# async def _help(ctx):
-#     h = '''
-# mv：从英文wiki搬运页面 eg: mv "Lion's Arch" 狮子拱门
-# fpi：即fix page images ,自动搬运页面中缺失的图片(搬运多个页面用空格隔开)eg: fpi 狮子拱门 神秘熔炉
-# fpi1: 从1代wiki中搬运图片,用法同上
-#     '''
-#     await ctx.send(h)
+@bot.command(name='tmv')
+async def tmv(ctx, *args):
+    """
+    从英文wiki搬运模板(不需要加前缀——templates:) eg: mv "Skill fact" "infobox npc"
+    :param ctx:
+    :return:
+    """
+    for tmp_name in args:
+        for res in wikibot.mv(tmp_name):
+            print(res)
+            await ctx.send(res)
 
 
 @bot.command()
