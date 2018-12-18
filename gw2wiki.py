@@ -53,7 +53,7 @@ class Gw2WikiBot:
                 "name_en": data_en["name"]
             })
 
-        yield self.upload_data(wiki_name, data)
+        return self.upload_data(wiki_name, data)
 
     def upload_data(self, wiki_name, data):
         wiki_content = json.dumps(data, ensure_ascii=False)
@@ -80,7 +80,8 @@ class Gw2WikiBot:
             need_update_ids = self.get_sync_ids(data_type, init)
             yield ("{}有{}个项需要更新".format(data_type, len(need_update_ids)))
         for data_id in need_update_ids:
-            for i in self.get_and_upload_data(data_type, data_id):
+            r = self.get_and_upload_data(data_type, data_id)
+            for i in r:
                 yield i
 
     def upload_images_by_page(self, page_name, wiki_version=2):
