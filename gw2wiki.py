@@ -129,7 +129,7 @@ class Gw2WikiBot:
             r = page.save(r.text, '{}>{}(机器人搬运)'.format(en_name, zh_name))
             if r['result'] == 'Success':
                 yield '页面:{}搬运成功，正在上传图片...'.format(zh_name)
-                for i in self.upload_images_by_page(zh_name):
+                for i in self.upload_images_by_page(zh_name, wiki_version=wiki_version):
                     yield i
                 yield '页面:{}搬运完成,图片上传完毕'.format(zh_name)
         else:
