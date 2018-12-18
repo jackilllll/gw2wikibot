@@ -53,7 +53,7 @@ class Gw2WikiBot:
                 "name_en": data_en["name"]
             })
 
-        self.upload_data(wiki_name, data)
+        yield self.upload_data(wiki_name, data)
 
     def upload_data(self, wiki_name, data):
         wiki_content = json.dumps(data, ensure_ascii=False)
