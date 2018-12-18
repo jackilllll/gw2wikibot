@@ -62,17 +62,23 @@ class Gw2WikiBot:
             page.save(wiki_content, 'upload data by bot')
             yield ('{}-上传成功'.format(wiki_name))
         else:
-            yield ('{}-已经存在'.format(wiki_name))
+            page.save(wiki_content, 'update data by bot')
+            yield ('{}-已经存在(完成更新)'.format(wiki_name))
 
-    def update(self, data_type, init=False):
+    def update(self, data_type, data_ids=None, init=False):
         """
         指定更新数据的类型，开始同步api数据
+        :param data_id: 数据ID
         :param data_type: 数据类型 ['item','skill',...]
         :param init: 是否初始化，用于第一次搬运一个新类型的数据
         :return:
         """
-        need_update_ids = self.get_sync_ids(data_type, init)
-        print("{}有{}个项需要更新".format(data_type, len(need_update_ids)))
+
+        if data_ids:
+            need_update_ids = data_ids
+        else:
+            need_update_ids = self.get_sync_ids(data_type, init)
+            yield ("{}有{}个项需要更新".format(data_type, len(need_update_ids)))
         for data_id in need_update_ids:
             yield self.get_and_upload_data(data_type, data_id)
 

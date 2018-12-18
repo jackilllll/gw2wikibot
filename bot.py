@@ -39,8 +39,17 @@ async def mv(ctx, en, zh):
 
 
 @bot.command()
-async def update(ctx, data_type):
-    for res in wikibot.update(data_type):
+async def update(ctx, data_type, data_ids=None):
+    """
+    eg: update item 23233,22224
+    :param data_type: 数据类型 [item,skill,achievement]
+    :param data_ids: 指定数据ids，单独更新数据 逗号隔开
+    :return:
+    """
+    ids = []
+    if data_ids:
+        ids = [int(i) for i in data_ids.split(',')]
+    for res in wikibot.update(data_type, ids):
         print(res)
         await ctx.send(res)
 
