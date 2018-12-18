@@ -39,6 +39,20 @@ async def mv(ctx, en, zh):
 
 
 @bot.command()
+async def mv1(ctx, en, zh):
+    """
+    从1代wiki搬运页面，用法同mv
+    :param ctx:
+    :param en:
+    :param zh:
+    :return:
+    """
+    for res in wikibot.mv(en, zh, wiki_version=1):
+        print(res)
+        await ctx.send(res)
+
+
+@bot.command()
 async def update(ctx, data_type, data_ids=None):
     """
     eg: update item 23233,22224

@@ -68,7 +68,7 @@ class Gw2WikiBot:
     def update(self, data_type, data_ids=None, init=False):
         """
         指定更新数据的类型，开始同步api数据
-        :param data_id: 数据ID
+        :param data_ids: [数据ID]
         :param data_type: 数据类型 ['item','skill',...]
         :param init: 是否初始化，用于第一次搬运一个新类型的数据
         :return:
@@ -113,16 +113,18 @@ class Gw2WikiBot:
 
         yield ('====【{}】中缺失的图片上传完毕(成功：{},失败:{})===='.format(page_name, all_account - fail_count, fail_count))
 
-    def mv(self, en_name, zh_name):
+    def mv(self, en_name, zh_name, wiki_version=2):
         """
         从英文wiki搬运页面到中文wiki,并自动处理图片上传
+        :param wiki_version: 1 or 2
         :param en_name: 英文wiki页面名称
         :param zh_name: 中文wiki页面名称
         :return:
         """
+        v = '' if wiki_version == 1 else 2
         page = self.site.pages[zh_name]
         if not page.exists:
-            en_page_url = 'https://wiki.guildwars2.com/index.php?title={}&action=raw'.format(en_name)
+            en_page_url = 'https://wiki.guildwars{}.com/index.php?title={}&action=raw'.format(v, en_name)
             r = requests.get(en_page_url)
             r = page.save(r.text, '{}>{}(机器人搬运)'.format(en_name, zh_name))
             if r['result'] == 'Success':
@@ -175,3 +177,7 @@ class Gw2WikiBot:
 
 
 wikibot = Gw2WikiBot(username=username, password=password)
+
+if __name__ == '__main__':
+    for i in wikibot.update(data_type='trait'):
+        print(i)
