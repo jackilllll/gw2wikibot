@@ -1,4 +1,5 @@
 import json
+import re
 import time
 from configparser import ConfigParser
 from urllib.parse import urljoin
@@ -17,6 +18,28 @@ class Gw2WikiBot:
     def __init__(self, username, password):
         self.site = mwclient.Site('gw2.huijiwiki.com')
         self.site.login(username, password)
+
+    def parse_text(self, text):
+        return self.site.expandtemplates(text)
+
+    def pre_parse(self, text):
+        """
+        预解析wiki文本,适用于开销较大的页面
+        缺点：解析出来的内容不易维护
+        :param text:
+        :return:
+        """
+        all_text = text
+        p = re.compile('(({{.*}}\n){2,20})')
+        r = p.findall(text)
+        group_count = len(r)
+        yield '正在解析模板,共{}组text需要被解析'.format(group_count)
+        for index, i in enumerate(r):
+            old = i[0]
+            new = self.parse_text(old)
+            yield '解析进度：{}/{}'.format(index + 1, group_count)
+            all_text = all_text.replace(old, new)
+        yield all_text
 
     @staticmethod
     def get_wiki_last_id(data_type):
@@ -126,7 +149,7 @@ class Gw2WikiBot:
         if not page.exists:
             en_page_url = 'https://wiki.guildwars{}.com/index.php?title={}&action=raw'.format(v, en_name)
             r = requests.get(en_page_url)
-            r = page.save(r.text, '{}>{}(机器人搬运)'.format(en_name, zh_name))
+            r = page.save(self.en_wiki_text_parse(r.text), '{}>{}(机器人搬运)'.format(en_name, zh_name))
             if r['result'] == 'Success':
                 yield '页面:{}搬运成功，正在上传图片...'.format(zh_name)
                 for i in self.upload_images_by_page(zh_name, wiki_version=wiki_version):
@@ -134,6 +157,12 @@ class Gw2WikiBot:
                 yield '页面:{}搬运完成,图片上传完毕'.format(zh_name)
         else:
             yield '页面已经存在无需搬运'
+
+    @staticmethod
+    def en_wiki_text_parse(text):
+        # 工程师模板替换
+        parsed_text = text.repalce('{{en}}', '{{eng}}')
+        return parsed_text
 
     def tmp_mv(self, en_name):
         """
@@ -179,5 +208,7 @@ class Gw2WikiBot:
 wikibot = Gw2WikiBot(username=username, password=password)
 
 if __name__ == '__main__':
-    for i in wikibot.update(data_type='trait'):
+    # text = '{{#invoke:API|filter|item|name|永恒}}'
+    # r = wikibot.parse_text(text)
+    for i in wikibot.update('recipe', init=True):
         print(i)
