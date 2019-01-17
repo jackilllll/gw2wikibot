@@ -22,6 +22,11 @@ class Gw2WikiBot:
     def parse_text(self, text):
         return self.site.expandtemplates(text)
 
+    @staticmethod
+    def parse_image_name(name):
+        p = re.compile('[\d]+px-')
+        return p.sub('', name)
+
     def pre_parse(self, text):
         """
         预解析wiki文本,适用于开销较大的页面
@@ -120,19 +125,20 @@ class Gw2WikiBot:
         fail_count = 0
         yield ('====开始上传【{}】中缺失的图片({}张)===='.format(page_name, all_account))
         for index, img in enumerate(need_upload_images):
-            origin_url = self.get_wiki_image_url(wiki_version, img.page_title)
+            parsed_image_name = self.parse_image_name(img.page_title)
+            origin_url = self.get_wiki_image_url(wiki_version, parsed_image_name)
             time.sleep(1)
             if origin_url:
                 try:
-                    self.site.upload(filename=img.page_title, url=origin_url)
-                    yield ('【{}】上传成功({}/{})'.format(img.page_title, index + 1, all_account))
+                    self.site.upload(filename=parsed_image_name, url=origin_url)
+                    yield ('【{}】上传成功({}/{})'.format(parsed_image_name, index + 1, all_account))
                 except Exception as e:
                     print(e)
                     fail_count += 1
-                    yield ('【{}】上传失败({}/{})'.format(img.page_title, index + 1, all_account))
+                    yield ('【{}】上传失败({}/{})'.format(parsed_image_name, index + 1, all_account))
             else:
                 fail_count += 1
-                yield ('【{}】上传失败(在wiki中找不到该图片)({}/{})'.format(img.page_title, index + 1, all_account))
+                yield ('【{}】上传失败(在wiki中找不到该图片)({}/{})'.format(parsed_image_name, index + 1, all_account))
 
         yield ('====【{}】中缺失的图片上传完毕(成功：{},失败:{})===='.format(page_name, all_account - fail_count, fail_count))
 
